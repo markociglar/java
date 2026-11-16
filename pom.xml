@@ -19,7 +19,7 @@
 
     <properties>
         <java.version>21</java.version>
-        <jacoco.version>0.8.13</jacoco.version>
+        <jacoco.version>0.8.16</jacoco.version>
         <snakeyaml.version>2.7</snakeyaml.version>
         <jackson-2-bom.version>2.21.7</jackson-2-bom.version>
         <logback.version>1.5.38</logback.version>
