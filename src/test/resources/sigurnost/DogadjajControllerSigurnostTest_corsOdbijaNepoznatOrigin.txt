@@ -1,0 +1,14 @@
+Naziv testa: DogadjajControllerSigurnostTest.corsOdbijaNepoznatOrigin
+Prijetnja: proizvoljan origin dobiva CORS dopuštenje s vjerodajnicama.
+
+Postman, lokalna instanca:
+1. Prijavi se kao ana i postavi Bearer token.
+2. Pošalji GET {{baseUrl}}/api/dogadjaji s headerom Origin: https://napadac.example.
+3. U kartici Headers odgovora potraži Access-Control-Allow-Origin i
+   Access-Control-Allow-Credentials.
+4. Kao kontrolu ponovi s Origin: http://localhost:5173 (dopušteni frontend).
+
+Ranjivo stanje: za napadac.example odgovor ima Access-Control-Allow-Origin:
+https://napadac.example i Access-Control-Allow-Credentials: true.
+Sigurno stanje: za nepoznati origin nema tih CORS zaglavlja; za localhost:5173 ostaju.
+Postman prikazuje HTTP zaglavlja, ali sam ne provodi pregledničku CORS politiku.

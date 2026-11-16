@@ -1,0 +1,15 @@
+Naziv testa: IspisControllerSigurnostTest.imeNaUlazniciJeSigurnoZaHtml
+Prijetnja: pohranjeni XSS u HTML prikazu ulaznice.
+
+Postman, lokalna instanca:
+1. Prijavi se kao ana i postavi Bearer token.
+2. Pošalji POST {{baseUrl}}/api/narudzbe, Body → raw → JSON:
+   {"dogadjajId":3,"kolicina":1,"imeNaUlaznici":"<img src=x onerror=alert(1)>","oib":"48291736504"}
+   Iz odgovora zapiši id narudžbe kao {{narudzbaId}}.
+3. Pošalji GET {{baseUrl}}/ispis/narudzbe/{{narudzbaId}} s istim tokenom.
+4. U sirovom HTML odgovoru pogledaj sadržaj elementa <dd> za ime na ulaznici.
+
+Ranjivo stanje: odgovor sadrži sirovi <img src=x onerror=alert(1)>.
+Sigurno stanje: napadački HTML nije aktivna oznaka (kodiran je ili uklonjen).
+Postman samo prikazuje tekst odgovora; ne izvršava JavaScript. Automatizirani test
+provjerava da sirova HTML oznaka ne stiže u odgovor.

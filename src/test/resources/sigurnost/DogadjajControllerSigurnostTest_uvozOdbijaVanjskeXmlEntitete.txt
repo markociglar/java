@@ -1,0 +1,22 @@
+Naziv testa: DogadjajControllerSigurnostTest.uvozOdbijaVanjskeXmlEntitete
+Prijetnja: XXE u XML uvozu omogućuje čitanje lokalne datoteke.
+
+Postman, lokalna instanca:
+1. Na računalu na kojem radi Java aplikacija napravi datoteku npr. C:\temp\xxe-proba.txt
+   sa sadržajem XXE_TEST_MARKER. Na Linuxu možeš upotrijebiti /tmp/xxe-proba.txt.
+2. Prijavi organizatora preko POST /api/auth/login i postavi Bearer token.
+3. Pošalji POST {{baseUrl}}/api/dogadjaji/uvoz.
+   Header: Content-Type: application/xml. Body → raw → XML:
+
+   <?xml version="1.0"?>
+   <!DOCTYPE dogadjaji [<!ENTITY xxe SYSTEM "file:///C:/temp/xxe-proba.txt">]>
+   <dogadjaji><dogadjaj><naziv>&xxe;</naziv><mjesto>Test</mjesto>
+   <datum>2027-01-01T20:00</datum><cijena>1.00</cijena><kapacitet>1</kapacitet>
+   </dogadjaj></dogadjaji>
+
+   Putanja file:// mora pokazivati na datoteku dostupnu procesu aplikacije.
+4. Provjeri status i polje dogadjaji[0].naziv u odgovoru.
+
+Ranjivo stanje: 200, naziv je XXE_TEST_MARKER.
+Sigurno stanje: 400, sadržaj datoteke nije vraćen i događaj nije uvezen.
+Automatizirani test sam pravi i briše privremenu datoteku.

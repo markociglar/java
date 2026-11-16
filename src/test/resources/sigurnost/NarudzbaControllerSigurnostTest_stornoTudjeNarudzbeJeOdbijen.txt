@@ -1,0 +1,17 @@
+Naziv testa: NarudzbaControllerSigurnostTest.stornoTudjeNarudzbeJeOdbijen
+Prijetnja: IDOR, prijavljeni kupac može stornirati tuđu narudžbu.
+
+Postman, lokalna instanca:
+1. Prijavi se kao ana; spremi njezin Bearer token.
+2. S Aninim tokenom pošalji POST {{baseUrl}}/api/narudzbe,
+   Body → raw → JSON:
+   {"dogadjajId":3,"kolicina":1,"imeNaUlaznici":"Sigurnosni test","oib":"48291736504"}
+   Očekuje se 201. Iz odgovora zapiši id narudžbe, npr. {{narudzbaId}}.
+3. Prijavi se kao marko; postavi Markov Bearer token.
+4. Pošalji DELETE {{baseUrl}}/api/narudzbe/{{narudzbaId}}.
+5. Vrati Anin token i pošalji GET {{baseUrl}}/api/narudzbe/moje;
+   provjeri postoji li id.
+
+Ranjivo stanje: korak 4 vraća 204, narudžba nestaje s Anina popisa.
+Sigurno stanje: korak 4 vraća 403 ili 404, narudžba ostaje Anina.
+Automatizirani test svaki put stvara novu narudžbu pa ne mijenja početne zapise.

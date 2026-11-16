@@ -1,0 +1,19 @@
+Naziv testa: PostavkeControllerSigurnostTest.yamlNeKonstruiraJavaObjekte
+Prijetnja: SnakeYAML može konstruirati Java objekte zadane u korisničkom YAML-u.
+
+Postman, lokalna instanca:
+1. Prijavi se kao ana i postavi Bearer token.
+2. Pošalji POST {{baseUrl}}/api/postavke s Content-Type: application/yaml.
+   Body → raw → Text:
+   podsjetnik: true
+   satiPrije: 24
+   kanal: !!java.util.Date 2026-11-11
+3. Provjeri odgovor. I ranjiva i sigurna inačica mogu vratiti 400 jer polje kanal
+   mora biti tekst email ili sms. Sam status zato NIJE dokaz sigurne deserijalizacije.
+4. Pokreni automatizirani test naveden u naslovu. On umjesto Date šalje bezopasnu
+   testnu klasu YamlConstructionMarker i bilježi je li njezin konstruktor pozvan.
+
+Ranjivo stanje: konstruktor se pozove prije odbijanja YAML-a; Java test pada.
+Sigurno stanje: proizvoljna Java klasa se ne konstruira; test prolazi.
+Testna klasa dostupna je samo u testnom classpathu, pa se taj dio ne može dokazati
+Postman zahtjevom prema uobičajeno pokrenutoj aplikaciji.

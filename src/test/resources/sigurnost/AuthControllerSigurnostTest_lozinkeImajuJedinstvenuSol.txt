@@ -1,0 +1,14 @@
+Naziv testa: AuthControllerSigurnostTest.lozinkeImajuJedinstvenuSol
+Prijetnja: jednake lozinke dobivaju jednak, brz SHA-256 sažetak bez zasebne soli.
+
+Postman, lokalna instanca:
+1. POST {{baseUrl}}/api/auth/register, Body → raw → JSON:
+   {"username":"hashaudit01","password":"IstaLozinka123!","email":"hashaudit01@example.test","ime":"Test","prezime":"Hash"}
+2. Ponovi registraciju za korisnika hashaudit02 s ISTOM lozinkom, ali drugom e-adresom.
+3. POST {{baseUrl}}/api/auth/login za oba korisnika; oboje se trebaju moći prijaviti.
+4. Sam Postman ne može očitati password_hash jer ga API ne izlaže. Pokreni navedeni Java test;
+   on registrira dva nova korisnika kroz API i pomoću JdbcTemplate očita njihove hash vrijednosti.
+
+Ranjivo stanje: dvije hash vrijednosti u bazi identične su; Java test pada.
+Sigurno stanje: jedinstvena sol daje različite pohranjene hash vrijednosti, a obje prijave rade.
+Ne pokušavaj izlagati hash vrijednosti dodatnim endpointom radi Postman provjere.

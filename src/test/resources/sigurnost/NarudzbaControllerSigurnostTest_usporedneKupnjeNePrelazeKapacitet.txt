@@ -1,0 +1,34 @@
+Naziv testa: NarudzbaControllerSigurnostTest.usporedneKupnjeNePrelazeKapacitet
+Prijetnja: dvije ili više usporednih kupnji zadnjeg mjesta premašuju kapacitet.
+
+Postman, lokalna instanca:
+1. Prijavi organizatora. Pošalji POST {{baseUrl}}/api/dogadjaji/uvoz,
+   Content-Type: application/xml, Body → raw → XML:
+   <dogadjaji><dogadjaj><naziv>Test zadnjeg mjesta</naziv><mjesto>Test</mjesto>
+   <datum>2027-02-01T20:00</datum><cijena>1.00</cijena><kapacitet>1</kapacitet>
+   </dogadjaj></dogadjaji>
+   Iz odgovora zapiši dogadjaji[0].id kao {{dogadjajId}}.
+2. Prijavi Anu; spremi token kao environment varijablu anaToken.
+3. Napravi GET {{baseUrl}}/api/health. U Scripts → Post-response stavi ovaj kod;
+   šalje četiri POST zahtjeva približno istodobno:
+
+   const base = pm.environment.get('baseUrl');
+   const token = pm.environment.get('anaToken');
+   const id = Number(pm.environment.get('dogadjajId'));
+   for (let i = 0; i < 4; i++) {
+     pm.sendRequest({
+       url: base + '/api/narudzbe', method: 'POST',
+       header: {'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json'},
+       body: {mode: 'raw', raw: JSON.stringify({dogadjajId: id, kolicina: 1,
+         imeNaUlaznici: 'Usporedna kupnja', oib: '48291736504'})}
+     }, (error, response) => console.log('kupnja', i, error || response.code));
+   }
+
+4. Pošalji GET /api/health; u Postman Console pregledaj statuse kupnji.
+5. Pošalji GET {{baseUrl}}/api/dogadjaji s Aninim tokenom i pronađi {{dogadjajId}}.
+   Usporedi polja kapacitet i prodano.
+
+Ranjivo stanje: dvije ili više kupnji vrate 201; prodano > kapacitet.
+Sigurno stanje: točno jedna kupnja vrati 201, ostale 409; prodano = 1.
+Ako se utrka ne dogodi, uvezi novi događaj kapaciteta 1 i ponovi. Nemoj ponavljati
+test na već rasprodanom događaju. Automatizirani test koristi barijeru za istodobni početak.

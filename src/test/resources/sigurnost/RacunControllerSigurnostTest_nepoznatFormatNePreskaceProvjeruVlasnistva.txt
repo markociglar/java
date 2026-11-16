@@ -1,0 +1,12 @@
+Naziv testa: RacunControllerSigurnostTest.nepoznatFormatNePreskaceProvjeruVlasnistva
+Prijetnja: nepoznat format preskače provjeru vlasništva računa.
+
+Postman, lokalna instanca:
+1. Prijavi se kao marko. U Authorization → Bearer Token postavi Markov token.
+2. Pošalji GET {{baseUrl}}/api/racuni/1?format=json.
+   Kontrola: Marko nije vlasnik računa 1; očekuje se 404.
+3. Pošalji GET {{baseUrl}}/api/racuni/1?format=nepoznat.
+4. Provjeri status te polja kupac i sadrzaj ako je odgovor JSON.
+
+Ranjivo stanje: korak 3 vraća 200, kupac = ana, sadrzaj sadrži Anin račun.
+Sigurno stanje: 403 ili 404; tuđi sadržaj se ne vraća ni za nepoznati format.

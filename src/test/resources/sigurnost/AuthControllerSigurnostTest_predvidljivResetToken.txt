@@ -1,0 +1,21 @@
+Naziv testa: AuthControllerSigurnostTest.predvidljivResetToken
+Prijetnja: token za reset lozinke moguće je pogoditi bez pristupa e-pošti.
+
+Postman, lokalna instanca:
+1. Registriraj NOVOG testnog korisnika: POST {{baseUrl}}/api/auth/register,
+   Body → raw → JSON:
+   {"username":"resetaudit01","password":"StaraLozinka123!","email":"resetaudit01@example.test","ime":"Test","prezime":"Reset"}
+   Ako korisničko ime već postoji, promijeni ga i koristi isto ime u svim sljedećim koracima.
+2. Pošalji POST {{baseUrl}}/api/auth/reset-zahtjev,
+   Body → raw → JSON: {"username":"resetaudit01"}. Očekuje se 202.
+3. Bez otvaranja poštanskog sandučića izračunaj MD5 nad točnim nizom
+   resetaudit01 + današnji lokalni datum oblika yyyy-MM-dd (Europe/Zagreb).
+   Primjer na Windows PowerShellu:
+   $s='resetaudit01'+(Get-Date -Format 'yyyy-MM-dd'); $m=[Security.Cryptography.MD5]::Create(); ([BitConverter]::ToString($m.ComputeHash([Text.Encoding]::UTF8.GetBytes($s)))).Replace('-','').ToLowerInvariant()
+4. Pošalji POST {{baseUrl}}/api/auth/reset,
+   Body → raw → JSON: {"token":"<izračunati MD5>","novaLozinka":"NovaLozinka123!"}.
+5. Pokušaj POST {{baseUrl}}/api/auth/login s novom lozinkom.
+
+Ranjivo stanje: korak 4 vraća 200, prijava novom lozinkom uspijeva.
+Sigurno stanje: izračunati token odbijen je s 400; stara lozinka i dalje radi.
+Automatizirani test koristi jedinstveno novo korisničko ime i provjerava oba uvjeta.

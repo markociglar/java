@@ -1,0 +1,20 @@
+Naziv testa: NarudzbaControllerSigurnostTest.csrfStornoJeOdbijen
+Prijetnja: zahtjev koji mijenja stanje prihvaća SESSION kolačić bez CSRF provjere.
+
+Postman, lokalna instanca:
+1. Prijavi Anu preko API-ja pa s njezinim Bearer tokenom napravi novu narudžbu:
+   POST {{baseUrl}}/api/narudzbe, Body → raw → JSON:
+   {"dogadjajId":3,"kolicina":1,"imeNaUlaznici":"CSRF proba","oib":"48291736504"}
+   Iz odgovora zapiši id kao {{narudzbaId}}.
+2. Napravi novi POST {{baseUrl}}/prijava. Body → x-www-form-urlencoded:
+   username=ana, password=Ana12345!. Postman može slijediti 302 preusmjeravanje;
+   SESSION kolačić možeš vidjeti u Postmanovoj kartici Cookies ili u Set-Cookie zaglavlju.
+3. Na novom DELETE {{baseUrl}}/api/narudzbe/{{narudzbaId}} postavi Authorization → No Auth.
+   Postavi headere Cookie: SESSION=<vrijednost iz koraka 2> i
+   Origin: http://localhost:18081. Nemoj dodavati CSRF token.
+4. S Aninim Bearer tokenom provjeri GET {{baseUrl}}/api/narudzbe/moje.
+
+Ranjivo stanje: DELETE vraća 204 i narudžba je obrisana.
+Sigurno stanje: DELETE vraća 401 ili 403 i narudžba ostaje.
+Postman može ručno poslati Cookie i Origin; stvarni preglednik dodatno primjenjuje
+SameSite i CORS pravila. Različit port na localhostu drugi je origin, ali isti site.
