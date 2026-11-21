@@ -61,7 +61,7 @@ public class UvozDogadjaja {
     private static DocumentBuilderFactory tvornica() {
         DocumentBuilderFactory tvornica = DocumentBuilderFactory.newInstance();
         tvornica.setNamespaceAware(true);
-        /*try {
+        try {
             tvornica.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
             tvornica.setFeature("http://xml.org/sax/features/external-general-entities", false);
             tvornica.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
@@ -70,7 +70,7 @@ public class UvozDogadjaja {
             tvornica.setExpandEntityReferences(false);
         } catch (ParserConfigurationException e) {
             throw new IllegalStateException("Sigurna XML obrada nije dostupna.", e);
-        }*/
+        }
         return tvornica;
     }
 
