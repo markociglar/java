@@ -70,6 +70,15 @@ class DogadjajiFunkcionalniTest extends ApiTestBaza {
     }
 
     @Test
+    @DisplayName("Popis odbija nedopuštene vrijednosti sortiranja")
+    void odbijaNedopustenoSortiranje() {
+        String token = prijava("ana", "Ana12345!");
+
+        assertThat(get("/api/dogadjaji?sort=naziv%20DESC", token).status()).isEqualTo(400);
+        assertThat(get("/api/dogadjaji?sort=naziv&smjer=asc%2C%20id", token).status()).isEqualTo(400);
+    }
+
+    @Test
     @DisplayName("Popis događaja prikazuje slobodna mjesta")
     void slobodnaMjesta() {
         String token = prijava("ana", "Ana12345!");

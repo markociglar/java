@@ -10,10 +10,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,22 +33,15 @@ public class DogadjajController {
                            int kapacitet, int prodano, int slobodno) {
     }
 
-    private static final RowMapper<Dogadjaj> MAPPER = (rs, i) -> new Dogadjaj(
-            rs.getLong("id"), rs.getString("naziv"), rs.getString("mjesto"),
-            rs.getObject("datum", LocalDateTime.class), rs.getBigDecimal("cijena"),
-            rs.getInt("kapacitet"), rs.getInt("prodano"), rs.getInt("kapacitet") - rs.getInt("prodano"));
-
-    private static final Map<String, String> STUPCI = Map.of(
-            "naziv", "naziv",
-            "mjesto", "mjesto",
-            "datum", "datum",
-            "cijena", "cijena");
+    private static final Set<String> STUPCI_ZA_SORTIRANJE = Set.of("naziv", "mjesto", "datum", "cijena");
 
     private final JdbcTemplate jdbc;
+    private final DogadjajRepository dogadjaji;
     private final UvozDogadjaja uvoz;
 
-    public DogadjajController(JdbcTemplate jdbc, UvozDogadjaja uvoz) {
+    public DogadjajController(JdbcTemplate jdbc, DogadjajRepository dogadjaji, UvozDogadjaja uvoz) {
         this.jdbc = jdbc;
+        this.dogadjaji = dogadjaji;
         this.uvoz = uvoz;
     }
 
@@ -56,18 +50,20 @@ public class DogadjajController {
     public List<Dogadjaj> popis(@RequestParam(defaultValue = "datum") String sort,
                                 @RequestParam(defaultValue = "asc") String smjer,
                                 PrijavljeniKorisnik korisnik) {
-        String stupac = STUPCI.get(sort);
-        String redoslijed = switch (smjer.toLowerCase(Locale.ROOT)) {
-            case "asc" -> "ASC";
-            case "desc" -> "DESC";
+        Sort.Direction redoslijed = switch (smjer.toLowerCase(Locale.ROOT)) {
+            case "asc" -> Sort.Direction.ASC;
+            case "desc" -> Sort.Direction.DESC;
             default -> null;
         };
-        if (stupac == null || redoslijed == null) {
+        if (redoslijed == null || !STUPCI_ZA_SORTIRANJE.contains(sort)) {
             throw ApiException.neispravno("Neispravan parametar sortiranja.");
         }
-        String sql = "SELECT id, naziv, mjesto, datum, cijena, kapacitet, prodano FROM dogadjaji ORDER BY "
-                + stupac + " " + redoslijed + ", id";
-        return jdbc.query(sql, MAPPER);
+        Sort red = Sort.by(new Sort.Order(redoslijed, sort), Sort.Order.asc("id"));
+        return dogadjaji.findAll(red).stream()
+                .map(d -> new Dogadjaj(d.getId(), d.getNaziv(), d.getMjesto(), d.getDatum(),
+                        d.getCijena(), d.getKapacitet(), d.getProdano(),
+                        d.getKapacitet() - d.getProdano()))
+                .toList();
     }
 
     /** Uvoz događaja iz XML-a (organizator ili administrator). */

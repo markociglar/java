@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -34,10 +35,23 @@ public class UvozDogadjaja {
     public List<Stavka> procitaj(byte[] xml) {
         Document dokument;
         try {
-            DocumentBuilder builder = tvornica().newDocumentBuilder();
+            DocumentBuilderFactory tvornica = DocumentBuilderFactory.newInstance();
+            tvornica.setNamespaceAware(true);
+            tvornica.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            tvornica.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            tvornica.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            tvornica.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            tvornica.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            tvornica.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            tvornica.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+            tvornica.setXIncludeAware(false);
+            tvornica.setExpandEntityReferences(false);
+            DocumentBuilder builder = tvornica.newDocumentBuilder();
             builder.setErrorHandler(new DefaultHandler());
             dokument = builder.parse(new ByteArrayInputStream(xml));
-        } catch (ParserConfigurationException | SAXException | IOException e) {
+        } catch (ParserConfigurationException | IllegalArgumentException e) {
+            throw new IllegalStateException("Sigurna XML obrada nije dostupna.", e);
+        } catch (SAXException | IOException e) {
             throw ApiException.neispravno("Neispravan XML.");
         }
         NodeList elementi = dokument.getElementsByTagName("dogadjaj");
@@ -56,22 +70,6 @@ public class UvozDogadjaja {
             }
         }
         return stavke;
-    }
-
-    private static DocumentBuilderFactory tvornica() {
-        DocumentBuilderFactory tvornica = DocumentBuilderFactory.newInstance();
-        tvornica.setNamespaceAware(true);
-        try {
-            tvornica.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-            tvornica.setFeature("http://xml.org/sax/features/external-general-entities", false);
-            tvornica.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-            tvornica.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-            tvornica.setXIncludeAware(false);
-            tvornica.setExpandEntityReferences(false);
-        } catch (ParserConfigurationException e) {
-            throw new IllegalStateException("Sigurna XML obrada nije dostupna.", e);
-        }
-        return tvornica;
     }
 
     private static String tekst(Element roditelj, String naziv) {
