@@ -15,7 +15,7 @@ class ZapNalaziTest extends ApiTestBaza {
     @Test
     @DisplayName("HTML ispis ulaznice salje Content-Security-Policy")
     void ispisImaCsp() {
-        Odgovor ispis = get("/ispis/narudzbe/1", prijava("ana", "Ana12345!"));
+        Odgovor ispis = get("/ispis/narudzbe/1", token("ana"));
 
         assertThat(ispis.status()).isEqualTo(200);
         assertThat(ispis.zaglavlje("Content-Security-Policy")).isNotBlank();
@@ -24,7 +24,7 @@ class ZapNalaziTest extends ApiTestBaza {
     @Test
     @DisplayName("HTML ispis ulaznice zabranjuje ugradnju u tudji okvir")
     void ispisSprjecavaClickjacking() {
-        Odgovor ispis = get("/ispis/narudzbe/1", prijava("ana", "Ana12345!"));
+        Odgovor ispis = get("/ispis/narudzbe/1", token("ana"));
 
         assertThat(ispis.status()).isEqualTo(200);
         String csp = ispis.zaglavlje("Content-Security-Policy");
@@ -38,7 +38,7 @@ class ZapNalaziTest extends ApiTestBaza {
     @Test
     @DisplayName("HTML i JSON odgovori salju X-Content-Type-Options nosniff")
     void odgovoriImajuNosniff() {
-        String token = prijava("ana", "Ana12345!");
+        String token = token("ana");
         Odgovor ispis = get("/ispis/narudzbe/1", token);
         Odgovor json = get("/api/racuni/1?format=json", token);
 
@@ -51,7 +51,7 @@ class ZapNalaziTest extends ApiTestBaza {
     @Test
     @DisplayName("Spremljena skripta iz JSON odgovora nije aktivni HTML na ulaznici")
     void spremljeniXssJeKodiranPriIspisu() {
-        String token = prijava("ana", "Ana12345!");
+        String token = token("ana");
         String payload = "<script>alert(1);</script>";
         Odgovor kreirana = postJson("/api/narudzbe", token,
                 Map.of("dogadjajId", 3, "kolicina", 1, "imeNaUlaznici", payload,

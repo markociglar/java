@@ -5,7 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /** Postavke aplikacije iz {@code application.properties} (prefiks {@code app}). */
 @ConfigurationProperties(prefix = "app")
-public record AppProperties(String naziv, String storageDir, String mailboxDir, Cors cors) {
+public record AppProperties(String naziv, String storageDir, Cors cors) {
 
     public record Cors(List<String> allowedOrigins) {
     }

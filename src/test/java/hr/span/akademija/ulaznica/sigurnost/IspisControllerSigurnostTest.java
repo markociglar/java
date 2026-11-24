@@ -14,7 +14,7 @@ class IspisControllerSigurnostTest extends ApiTestBaza {
     @Test
     @DisplayName("Ispis ulaznice ne umeće ime kupca kao HTML")
     void imeNaUlazniciJeSigurnoZaHtml() {
-        String token = prijava("ana", "Ana12345!");
+        String token = token("ana");
         String ime = "<img src=x onerror=alert(1)>";
         Odgovor kreirana = postJson("/api/narudzbe", token,
                 Map.of("dogadjajId", 3, "kolicina", 1, "imeNaUlaznici", ime, "oib", "48291736504"));

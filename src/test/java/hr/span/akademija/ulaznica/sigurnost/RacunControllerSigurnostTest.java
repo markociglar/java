@@ -13,7 +13,7 @@ class RacunControllerSigurnostTest extends ApiTestBaza {
     @Test
     @DisplayName("Nepoznat format ne otkriva tuđi račun")
     void nepoznatFormatNePreskaceProvjeruVlasnistva() {
-        String marko = prijava("marko", "Marko12345!");
+        String marko = token("marko");
         Odgovor odgovor = get("/api/racuni/1?format=nepoznat", marko);
 
         assertThat(odgovor.status()).isIn(403, 404);

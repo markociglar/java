@@ -26,7 +26,7 @@ class DogadjajiFunkcionalniTest extends ApiTestBaza {
     @Test
     @DisplayName("Događaji sortirani po datumu uzlazno")
     void poDatumuUzlazno() {
-        String token = prijava("ana", "Ana12345!");
+        String token = token("ana");
 
         Odgovor odgovor = get("/api/dogadjaji?sort=datum&smjer=asc", token);
 
@@ -38,7 +38,7 @@ class DogadjajiFunkcionalniTest extends ApiTestBaza {
     @Test
     @DisplayName("Događaji sortirani po nazivu silazno")
     void poNazivuSilazno() {
-        String token = prijava("ana", "Ana12345!");
+        String token = token("ana");
 
         Odgovor odgovor = get("/api/dogadjaji?sort=naziv&smjer=desc", token);
 
@@ -49,7 +49,7 @@ class DogadjajiFunkcionalniTest extends ApiTestBaza {
     @Test
     @DisplayName("Događaji sortirani po cijeni i po mjestu")
     void poCijeniIMjestu() {
-        String token = prijava("ana", "Ana12345!");
+        String token = token("ana");
 
         Odgovor poCijeni = get("/api/dogadjaji?sort=cijena&smjer=asc", token);
         Odgovor poMjestu = get("/api/dogadjaji?sort=mjesto&smjer=asc", token);
@@ -61,7 +61,7 @@ class DogadjajiFunkcionalniTest extends ApiTestBaza {
     @Test
     @DisplayName("Zadano sortiranje je po datumu uzlazno")
     void zadanoSortiranje() {
-        String token = prijava("ana", "Ana12345!");
+        String token = token("ana");
 
         Odgovor odgovor = get("/api/dogadjaji", token);
 
@@ -72,7 +72,7 @@ class DogadjajiFunkcionalniTest extends ApiTestBaza {
     @Test
     @DisplayName("Popis odbija nedopuštene vrijednosti sortiranja")
     void odbijaNedopustenoSortiranje() {
-        String token = prijava("ana", "Ana12345!");
+        String token = token("ana");
 
         assertThat(get("/api/dogadjaji?sort=naziv%20DESC", token).status()).isEqualTo(400);
         assertThat(get("/api/dogadjaji?sort=naziv&smjer=asc%2C%20id", token).status()).isEqualTo(400);
@@ -81,7 +81,7 @@ class DogadjajiFunkcionalniTest extends ApiTestBaza {
     @Test
     @DisplayName("Popis događaja prikazuje slobodna mjesta")
     void slobodnaMjesta() {
-        String token = prijava("ana", "Ana12345!");
+        String token = token("ana");
 
         for (JsonNode d : get("/api/dogadjaji", token).json()) {
             assertThat(d.get("slobodno").asInt()).isEqualTo(d.get("kapacitet").asInt() - d.get("prodano").asInt());

@@ -1,0 +1,7 @@
+Provjera: access token iz drugog Keycloak realma ne smije pristupiti API-ju.
+
+1. Dobavi token iz drugog realma s istim korisničkim imenom.
+2. Pošalji GET /api/ja s Authorization: Bearer <token>.
+3. Očekuj 401. Aplikacija prihvaća samo issuer http://localhost:8180/realms/ulaznice.
+
+Automatizirani test: AuthControllerSigurnostTest.pogresanIssuer.

@@ -1,0 +1,12 @@
+# Local development only. Credentials and HTTP are intentionally limited to localhost.
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.1
+    command: ["start-dev", "--import-realm", "--health-enabled=true"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: kcadmin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: kcadmin-samo-za-razvoj
+    ports:
+      - "127.0.0.1:8180:8080"
+    volumes:
+      - ./realm-ulaznice.json:/opt/keycloak/data/import/realm-ulaznice.json:ro

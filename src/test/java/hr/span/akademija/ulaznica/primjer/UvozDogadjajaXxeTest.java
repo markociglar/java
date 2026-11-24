@@ -45,7 +45,7 @@ class UvozDogadjajaXxeTest extends ApiTestBaza {
                       </dogadjaj>
                     </dogadjaji>
                     """.formatted(server.getAddress().getPort());
-            String token = prijava("organizator", "Ovlasteni12345!");
+            String token = token("organizator");
 
             Odgovor rezultat = posalji("POST", "/api/dogadjaji/uvoz", token, "application/xml", xml);
 

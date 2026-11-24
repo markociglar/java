@@ -20,7 +20,7 @@ class PostavkeControllerSigurnostTest extends ApiTestBaza {
                 kanal: !!hr.span.akademija.ulaznica.sigurnost.YamlConstructionMarker {}
                 """;
 
-        String token = prijava("ana", "Ana12345!");
+        String token = token("ana");
         Odgovor odgovor = posalji("POST", "/api/postavke", token, "application/yaml", yaml);
 
         assertThat(odgovor.status()).isEqualTo(400);

@@ -1,0 +1,7 @@
+Provjera: token za drugu aplikaciju ne smije pristupiti Ulaznice API-ju.
+
+1. Dobavi token kojem aud ne sadrži ulaznice-api.
+2. Pošalji GET /api/ja s Authorization: Bearer <token>.
+3. Očekuj 401.
+
+Automatizirani test: AuthControllerSigurnostTest.pogresanAudience.

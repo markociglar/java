@@ -15,14 +15,15 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.context.annotation.Import;
+import hr.span.akademija.ulaznica.keycloak.TestniKeycloak;
 
 /**
  * Zajednička baza za testove koji aplikaciju pokreću na nasumičnom portu i šalju stvarne HTTP zahtjeve
@@ -31,6 +32,8 @@ import org.springframework.test.context.DynamicPropertySource;
  * Dokumenti i poruke e-pošte spremaju se u privremenu mapu, a ne u {@code ./data}.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Import(TestniKeycloak.class)
+@TestPropertySource(properties = "spring.datasource.url=jdbc:h2:mem:ulaznica-test;DB_CLOSE_DELAY=-1")
 public abstract class ApiTestBaza {
 
     protected static final ObjectMapper JSON = new ObjectMapper();
@@ -49,15 +52,10 @@ public abstract class ApiTestBaza {
     @DynamicPropertySource
     static void mape(DynamicPropertyRegistry registry) {
         registry.add("app.storage-dir", () -> mapaDokumenata().toString());
-        registry.add("app.mailbox-dir", () -> mapaPoste().toString());
     }
 
     protected static Path mapaDokumenata() {
         return RADNA_MAPA.resolve("dokumenti");
-    }
-
-    protected static Path mapaPoste() {
-        return RADNA_MAPA.resolve("posta");
     }
 
     /** HTTP odgovor: status, zaglavlja i tijelo kao tekst. */
@@ -124,30 +122,9 @@ public abstract class ApiTestBaza {
         return posalji("POST", put, null, "application/x-www-form-urlencoded", tijelo);
     }
 
-    /** Prijava preko {@code POST /api/auth/login}; vraća token. */
-    protected String prijava(String username, String lozinka) {
-        Odgovor odgovor = postJson("/api/auth/login", null, Map.of("username", username, "password", lozinka));
-        if (odgovor.status() != 200) {
-            throw new AssertionError("Prijava nije uspjela za " + username + ": " + odgovor.status() + " "
-                    + odgovor.tijelo());
-        }
-        return odgovor.json().get("token").asText();
-    }
-
-    /** Registrira novog korisnika s jedinstvenim imenom (prefiks + nasumični nastavak) i vraća ime. */
-    protected String noviKorisnik(String prefiks, String lozinka) {
-        String username = prefiks + UUID.randomUUID().toString().replace("-", "").substring(0, 10);
-        Map<String, Object> podaci = new LinkedHashMap<>();
-        podaci.put("username", username);
-        podaci.put("password", lozinka);
-        podaci.put("email", username + "@primjer.hr");
-        podaci.put("ime", "Test");
-        podaci.put("prezime", "Korisnik");
-        Odgovor odgovor = postJson("/api/auth/register", null, podaci);
-        if (odgovor.status() != 201) {
-            throw new AssertionError("Registracija nije uspjela: " + odgovor.status() + " " + odgovor.tijelo());
-        }
-        return username;
+    /** Potpisani access token s istim claimovima kao Keycloak realm. */
+    protected String token(String username) {
+        return TestniKeycloak.token(username);
     }
 
     protected static String enc(String vrijednost) {

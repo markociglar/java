@@ -12,8 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 /**
- * Početni podaci (baza je u memoriji pa se puni pri svakom pokretanju). Lozinke se spremaju istom
- * metodom kao pri registraciji.
+ * Početni podaci (baza je u memoriji pa se puni pri svakom pokretanju).
  */
 @Component
 public class PocetniPodaci implements CommandLineRunner {
@@ -41,11 +40,10 @@ public class PocetniPodaci implements CommandLineRunner {
         if (postojeci != null && postojeci > 0) {
             return;
         }
-        korisnici.kreiraj("ana", "Ana12345!", "ana@primjer.hr", "Ana", "Anić", "KORISNIK", "48291736504");
-        korisnici.kreiraj("marko", "Marko12345!", "marko@primjer.hr", "Marko", "Marić", "KORISNIK", "73019485267");
-        korisnici.kreiraj("organizator", "Ovlasteni12345!", "organizator@primjer.hr", "Nina", "Novak",
-                "ORGANIZATOR", "50617283940");
-        korisnici.kreiraj("admin", "Admin12345!", "admin@primjer.hr", "Ivana", "Admin", "ADMIN", "61728394051");
+        korisnici.kreiraj("ana", "ana@primjer.hr", "Ana", "Anić", "48291736504");
+        korisnici.kreiraj("marko", "marko@primjer.hr", "Marko", "Marić", "73019485267");
+        korisnici.kreiraj("organizator", "organizator@primjer.hr", "Nina", "Novak", "50617283940");
+        korisnici.kreiraj("admin", "admin@primjer.hr", "Ivana", "Admin", "61728394051");
 
         dogadjaj("Gibonni – akustični koncert", "Lisinski, Zagreb", "2026-12-05T20:00", "35.00", 1800, 1);
         dogadjaj("Hamlet", "HNK Zagreb", "2026-12-08T19:30", "22.00", 700, 2);
@@ -81,4 +79,5 @@ public class PocetniPodaci implements CommandLineRunner {
     private void racun(long narudzbaId, String kupac, String datoteka) {
         jdbc.update("INSERT INTO racuni (narudzba_id, kupac, datoteka) VALUES (?, ?, ?)", narudzbaId, kupac, datoteka);
     }
+
 }

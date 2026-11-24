@@ -18,7 +18,7 @@ class NarudzbeFunkcionalniTest extends ApiTestBaza {
     private static final long IZUZETI_DOGADJAJ = 5;
 
     private long noviDogadjaj(int kapacitet) {
-        String organizator = prijava("organizator", "Ovlasteni12345!");
+        String organizator = token("organizator");
         String xml = "<dogadjaji><dogadjaj><naziv>Dodatni koncert</naziv><mjesto>Dom sportova</mjesto>"
                 + "<datum>2027-02-01T20:00</datum><cijena>20.00</cijena><kapacitet>" + kapacitet
                 + "</kapacitet></dogadjaj></dogadjaji>";
@@ -52,7 +52,7 @@ class NarudzbeFunkcionalniTest extends ApiTestBaza {
     @Test
     @DisplayName("Nova narudžba vraća 201 i vidljiva je u mojim narudžbama")
     void novaNarudzba() {
-        String token = prijava("ana", "Ana12345!");
+        String token = token("ana");
 
         Odgovor odgovor = naruci(token, 3, 2, "Ana Anić");
 
@@ -67,7 +67,7 @@ class NarudzbeFunkcionalniTest extends ApiTestBaza {
     @Test
     @DisplayName("Narudžba izdaje račun vidljiv kupcu")
     void narudzbaIzdajeRacun() {
-        String token = prijava("marko", "Marko12345!");
+        String token = token("marko");
         long id = naruci(token, 4, 1, "Marko Marić").json().get("id").asLong();
 
         boolean postoji = false;
@@ -81,7 +81,7 @@ class NarudzbeFunkcionalniTest extends ApiTestBaza {
     @Test
     @DisplayName("Količina izvan raspona 1–4 vraća 400")
     void neispravnaKolicina() {
-        String token = prijava("ana", "Ana12345!");
+        String token = token("ana");
 
         assertThat(naruci(token, 3, 5, "Ana Anić").status()).isEqualTo(400);
         assertThat(naruci(token, 3, 0, "Ana Anić").status()).isEqualTo(400);
@@ -91,8 +91,8 @@ class NarudzbeFunkcionalniTest extends ApiTestBaza {
     @DisplayName("Narudžba rasprodanog događaja vraća 409")
     void rasprodanDogadjaj() {
         long dogadjajId = noviDogadjaj(1);
-        String ana = prijava("ana", "Ana12345!");
-        String marko = prijava("marko", "Marko12345!");
+        String ana = token("ana");
+        String marko = token("marko");
         assertThat(naruci(ana, dogadjajId, 1, "Ana Anić").status()).isEqualTo(201);
 
         Odgovor odgovor = naruci(marko, dogadjajId, 1, "Marko Marić");
@@ -104,7 +104,7 @@ class NarudzbeFunkcionalniTest extends ApiTestBaza {
     @Test
     @DisplayName("Kupac može stornirati vlastitu narudžbu")
     void stornoVlastiteNarudzbe() {
-        String token = prijava("ana", "Ana12345!");
+        String token = token("ana");
         long dogadjajId = noviDogadjaj(50);
         long id = naruci(token, dogadjajId, 3, "Ana Anić").json().get("id").asLong();
         int prodanoPrije = dogadjaj(token, dogadjajId).get("prodano").asInt();
@@ -119,7 +119,7 @@ class NarudzbeFunkcionalniTest extends ApiTestBaza {
     @Test
     @DisplayName("Ulaznica za ispis sadrži ime na ulaznici")
     void ispisUlaznice() {
-        String token = prijava("ana", "Ana12345!");
+        String token = token("ana");
         long id = naruci(token, 6, 1, "Ana i Marko").json().get("id").asLong();
 
         Odgovor odgovor = get("/ispis/narudzbe/" + id, token);
@@ -132,7 +132,7 @@ class NarudzbeFunkcionalniTest extends ApiTestBaza {
     @Test
     @DisplayName("Narudžba nepostojećeg događaja vraća 404")
     void nepostojeciDogadjaj() {
-        String token = prijava("ana", "Ana12345!");
+        String token = token("ana");
 
         assertThat(naruci(token, 999_999, 1, "Ana Anić").status()).isEqualTo(404);
     }
@@ -140,7 +140,7 @@ class NarudzbeFunkcionalniTest extends ApiTestBaza {
     @Test
     @DisplayName("Događaj 5 se ne koristi u funkcionalnim testovima")
     void izuzetiDogadjajPostoji() {
-        String token = prijava("ana", "Ana12345!");
+        String token = token("ana");
 
         assertThat(dogadjaj(token, IZUZETI_DOGADJAJ).get("kapacitet").asInt()).isEqualTo(100);
     }

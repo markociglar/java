@@ -2,7 +2,7 @@ package hr.span.akademija.ulaznica.platforma;
 
 import java.util.Arrays;
 
-/** Korisnik prijavljen tokenom (zaglavlje Authorization ili kolačić SESSION). */
+/** User authenticated by a Keycloak Bearer token. */
 public record PrijavljeniKorisnik(long id, String username, String uloga) {
 
     public boolean isAdmin() {

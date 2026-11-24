@@ -4,7 +4,7 @@ Prijetnja: XXE u XML uvozu omogućuje čitanje lokalne datoteke.
 Postman, lokalna instanca:
 1. Na računalu na kojem radi Java aplikacija napravi datoteku npr. C:\temp\xxe-proba.txt
    sa sadržajem XXE_TEST_MARKER. Na Linuxu možeš upotrijebiti /tmp/xxe-proba.txt.
-2. Prijavi organizatora preko POST /api/auth/login i postavi Bearer token.
+2. Dohvati organizatorov Keycloak token kroz ulaznice-dev-cli i postavi Bearer token.
 3. Pošalji POST {{baseUrl}}/api/dogadjaji/uvoz.
    Header: Content-Type: application/xml. Body → raw → XML:
 

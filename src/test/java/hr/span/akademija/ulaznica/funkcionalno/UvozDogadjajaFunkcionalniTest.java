@@ -27,7 +27,7 @@ class UvozDogadjajaFunkcionalniTest extends ApiTestBaza {
     @Test
     @DisplayName("Organizator uvozi događaje iz XML-a")
     void organizatorUvozi() {
-        String token = prijava("organizator", "Ovlasteni12345!");
+        String token = token("organizator");
 
         Odgovor odgovor = posalji("POST", "/api/dogadjaji/uvoz", token, "application/xml", XML);
 
@@ -46,7 +46,7 @@ class UvozDogadjajaFunkcionalniTest extends ApiTestBaza {
     @Test
     @DisplayName("Administrator može uvoziti događaje")
     void administratorUvozi() {
-        String token = prijava("admin", "Admin12345!");
+        String token = token("admin");
 
         assertThat(posalji("POST", "/api/dogadjaji/uvoz", token, "application/xml", XML).status()).isEqualTo(200);
     }
@@ -54,7 +54,7 @@ class UvozDogadjajaFunkcionalniTest extends ApiTestBaza {
     @Test
     @DisplayName("Korisnik s ulogom KORISNIK ne može uvoziti događaje")
     void korisnikNeMozeUvoziti() {
-        String token = prijava("ana", "Ana12345!");
+        String token = token("ana");
 
         assertThat(posalji("POST", "/api/dogadjaji/uvoz", token, "application/xml", XML).status()).isEqualTo(403);
     }
@@ -62,7 +62,7 @@ class UvozDogadjajaFunkcionalniTest extends ApiTestBaza {
     @Test
     @DisplayName("Neispravan XML vraća 400")
     void neispravanXml() {
-        String token = prijava("organizator", "Ovlasteni12345!");
+        String token = token("organizator");
 
         Odgovor odgovor = posalji("POST", "/api/dogadjaji/uvoz", token, "application/xml", "<dogadjaji><dogadjaj>");
 

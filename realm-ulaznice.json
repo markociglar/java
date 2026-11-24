@@ -1,0 +1,83 @@
+{
+  "realm": "ulaznice",
+  "displayName": "Ulaznice",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "resetPasswordAllowed": false,
+  "loginWithEmailAllowed": false,
+  "duplicateEmailsAllowed": false,
+  "bruteForceProtected": true,
+  "failureFactor": 5,
+  "permanentLockout": false,
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 1800,
+  "passwordPolicy": "length(8) and notUsername",
+  "roles": {
+    "realm": [
+      { "name": "KORISNIK", "description": "Kupac ulaznica" },
+      { "name": "ORGANIZATOR", "description": "Organizator događaja" },
+      { "name": "ADMIN", "description": "Administrator" }
+    ]
+  },
+  "users": [
+    {
+      "username": "ana", "enabled": true, "email": "ana@primjer.hr", "emailVerified": true,
+      "firstName": "Ana", "lastName": "Anić",
+      "credentials": [{ "type": "password", "value": "Ana12345!", "temporary": false }],
+      "realmRoles": ["KORISNIK", "default-roles-ulaznice"]
+    },
+    {
+      "username": "marko", "enabled": true, "email": "marko@primjer.hr", "emailVerified": true,
+      "firstName": "Marko", "lastName": "Marić",
+      "credentials": [{ "type": "password", "value": "Marko12345!", "temporary": false }],
+      "realmRoles": ["KORISNIK", "default-roles-ulaznice"]
+    },
+    {
+      "username": "organizator", "enabled": true, "email": "organizator@primjer.hr", "emailVerified": true,
+      "firstName": "Nina", "lastName": "Novak",
+      "credentials": [{ "type": "password", "value": "Ovlasteni12345!", "temporary": false }],
+      "realmRoles": ["ORGANIZATOR", "default-roles-ulaznice"]
+    },
+    {
+      "username": "admin", "enabled": true, "email": "admin@primjer.hr", "emailVerified": true,
+      "firstName": "Ivana", "lastName": "Admin",
+      "credentials": [{ "type": "password", "value": "Admin12345!", "temporary": false }],
+      "realmRoles": ["ADMIN", "default-roles-ulaznice"]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "ulaznice-api", "name": "Ulaznice API (audience)", "enabled": true,
+      "publicClient": false, "standardFlowEnabled": false, "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false, "serviceAccountsEnabled": false,
+      "protocol": "openid-connect"
+    },
+    {
+      "clientId": "ulaznice-spa", "name": "Ulaznice web (PKCE)", "enabled": true,
+      "publicClient": true, "standardFlowEnabled": true, "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false, "serviceAccountsEnabled": false,
+      "protocol": "openid-connect",
+      "redirectUris": ["http://localhost:5173/*"], "webOrigins": ["http://localhost:5173"],
+      "attributes": { "pkce.code.challenge.method": "S256", "post.logout.redirect.uris": "http://localhost:5173/*" },
+      "protocolMappers": [{
+        "name": "audience-ulaznice-api", "protocol": "openid-connect",
+        "protocolMapper": "oidc-audience-mapper", "consentRequired": false,
+        "config": { "included.client.audience": "ulaznice-api", "id.token.claim": "false",
+                    "access.token.claim": "true", "introspection.token.claim": "true" }
+      }]
+    },
+    {
+      "clientId": "ulaznice-dev-cli", "name": "Development CLI only", "enabled": true,
+      "publicClient": true, "standardFlowEnabled": false, "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true, "serviceAccountsEnabled": false,
+      "protocol": "openid-connect",
+      "protocolMappers": [{
+        "name": "audience-ulaznice-api", "protocol": "openid-connect",
+        "protocolMapper": "oidc-audience-mapper", "consentRequired": false,
+        "config": { "included.client.audience": "ulaznice-api", "id.token.claim": "false",
+                    "access.token.claim": "true", "introspection.token.claim": "true" }
+      }]
+    }
+  ]
+}

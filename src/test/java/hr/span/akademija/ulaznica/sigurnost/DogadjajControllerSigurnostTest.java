@@ -27,7 +27,7 @@ class DogadjajControllerSigurnostTest extends ApiTestBaza {
                     </dogadjaj></dogadjaji>
                     """.formatted(tajna.toUri());
 
-            String token = prijava("organizator", "Ovlasteni12345!");
+            String token = token("organizator");
             Odgovor odgovor = posalji("POST", "/api/dogadjaji/uvoz", token, "application/xml", xml);
 
             assertThat(odgovor.status()).isEqualTo(400);
@@ -40,7 +40,7 @@ class DogadjajControllerSigurnostTest extends ApiTestBaza {
     @Test
     @DisplayName("Nepoznat Origin ne dobiva pristup API-ju s vjerodajnicama")
     void corsOdbijaNepoznatOrigin() {
-        String token = prijava("ana", "Ana12345!");
+        String token = token("ana");
         Odgovor odgovor = posalji("GET", "/api/dogadjaji", token, null, null,
                 "Origin", "https://napadac.example");
 

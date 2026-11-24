@@ -30,8 +30,8 @@ class NarudzbaControllerSigurnostTest extends ApiTestBaza {
     @Test
     @DisplayName("Korisnik ne može stornirati tuđu narudžbu")
     void stornoTudjeNarudzbeJeOdbijen() {
-        String ana = prijava("ana", "Ana12345!");
-        String marko = prijava("marko", "Marko12345!");
+        String ana = token("ana");
+        String marko = token("marko");
         long id = novaNarudzba(ana, 3);
 
         Odgovor odgovor = delete("/api/narudzbe/" + id, marko);
@@ -44,15 +44,10 @@ class NarudzbaControllerSigurnostTest extends ApiTestBaza {
     @Test
     @DisplayName("Zahtjev s kolačićem s drugog origina ne može stornirati narudžbu")
     void csrfStornoJeOdbijen() {
-        String ana = prijava("ana", "Ana12345!");
+        String ana = token("ana");
         long id = novaNarudzba(ana, 3);
-        Odgovor webPrijava = postForma("/prijava",
-                Map.of("username", "ana", "password", "Ana12345!"));
-        assertThat(webPrijava.status()).isEqualTo(302);
-        String kolacic = webPrijava.zaglavlje("Set-Cookie").split(";")[0];
-
         Odgovor odgovor = posalji("DELETE", "/api/narudzbe/" + id, null, null, null,
-                "Cookie", kolacic, "Origin", "http://localhost:18081");
+                "Cookie", "SESSION=neki-token", "Origin", "http://localhost:18081");
 
         assertThat(odgovor.status()).isIn(401, 403);
         assertThat(get("/api/narudzbe/moje", ana).json().findValuesAsText("id"))
@@ -62,7 +57,7 @@ class NarudzbaControllerSigurnostTest extends ApiTestBaza {
     @Test
     @DisplayName("Usporedne kupnje ne mogu premašiti kapacitet događaja")
     void usporedneKupnjeNePrelazeKapacitet() throws Exception {
-        String organizator = prijava("organizator", "Ovlasteni12345!");
+        String organizator = token("organizator");
         String xml = """
                 <dogadjaji><dogadjaj><naziv>Test zadnjeg mjesta</naziv><mjesto>Test</mjesto>
                 <datum>2027-02-01T20:00</datum><cijena>1.00</cijena><kapacitet>1</kapacitet>
@@ -71,7 +66,7 @@ class NarudzbaControllerSigurnostTest extends ApiTestBaza {
         Odgovor uvoz = posalji("POST", "/api/dogadjaji/uvoz", organizator, "application/xml", xml);
         assertThat(uvoz.status()).isEqualTo(200);
         long dogadjajId = uvoz.json().get("dogadjaji").get(0).get("id").asLong();
-        String ana = prijava("ana", "Ana12345!");
+        String ana = token("ana");
 
         int brojKupaca = 4;
         ExecutorService dretve = Executors.newFixedThreadPool(brojKupaca);

@@ -14,7 +14,7 @@ class PostavkeFunkcionalniTest extends ApiTestBaza {
     @Test
     @DisplayName("Spremanje postavki obavijesti u YAML formatu")
     void spremanjePostavki() {
-        String token = prijava("marko", "Marko12345!");
+        String token = token("marko");
         String yaml = """
                 podsjetnik: true
                 satiPrije: 24
@@ -33,7 +33,7 @@ class PostavkeFunkcionalniTest extends ApiTestBaza {
     @Test
     @DisplayName("Spremljene postavke se mogu dohvatiti")
     void dohvatPostavki() {
-        String token = prijava("ana", "Ana12345!");
+        String token = token("ana");
         String yaml = "podsjetnik: false\nsatiPrije: 48\nkanal: sms\n";
 
         Odgovor spremanje = posalji("POST", "/api/postavke", token, "text/plain", yaml);
@@ -49,7 +49,7 @@ class PostavkeFunkcionalniTest extends ApiTestBaza {
     @Test
     @DisplayName("Nepoznat kanal obavijesti vraća 400")
     void nepoznatKanal() {
-        String token = prijava("ana", "Ana12345!");
+        String token = token("ana");
 
         Odgovor odgovor = posalji("POST", "/api/postavke", token, "application/yaml", "kanal: golub\n");
 

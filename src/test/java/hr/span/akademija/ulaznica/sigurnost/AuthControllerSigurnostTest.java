@@ -3,53 +3,45 @@ package hr.span.akademija.ulaznica.sigurnost;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import hr.span.akademija.ulaznica.ApiTestBaza;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.time.LocalDate;
-import java.util.HexFormat;
-import java.util.Map;
+import hr.span.akademija.ulaznica.keycloak.TestniKeycloak;
+import java.time.Instant;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 @Tag("sigurnost")
 class AuthControllerSigurnostTest extends ApiTestBaza {
-
-    @Autowired
-    private JdbcTemplate jdbc;
-
     @Test
-    @DisplayName("Reset lozinke ne prihvaća token izračunat iz korisničkog imena i datuma")
-    void predvidljivResetToken() throws Exception {
-        String username = noviKorisnik("resetaudit", "StaraLozinka123!");
-        assertThat(postJson("/api/auth/reset-zahtjev", null, Map.of("username", username)).status())
-                .isEqualTo(202);
-
-        String izracunatiToken = HexFormat.of().formatHex(MessageDigest.getInstance("MD5")
-                .digest((username + LocalDate.now()).getBytes(StandardCharsets.UTF_8)));
-        Odgovor reset = postJson("/api/auth/reset", null,
-                Map.of("token", izracunatiToken, "novaLozinka", "NovaLozinka123!"));
-
-        assertThat(reset.status()).isEqualTo(400);
-        assertThat(postJson("/api/auth/login", null,
-                Map.of("username", username, "password", "StaraLozinka123!")).status()).isEqualTo(200);
+    @DisplayName("JWT iz pogrešnog realma nije prihvaćen")
+    void pogresanIssuer() {
+        String jwt = TestniKeycloak.token("ana", "http://localhost:8180/realms/drugi",
+                TestniKeycloak.AUDIENCE, Instant.now().plusSeconds(300));
+        assertThat(get("/api/ja", jwt).status()).isEqualTo(401);
     }
 
     @Test
-    @DisplayName("Dvije jednake lozinke imaju različite pohranjene sažetke")
-    void lozinkeImajuJedinstvenuSol() {
-        String prvi = noviKorisnik("hashaudit", "IstaLozinka123!");
-        String drugi = noviKorisnik("hashaudit", "IstaLozinka123!");
+    @DisplayName("JWT za drugu aplikaciju nije prihvaćen")
+    void pogresanAudience() {
+        String jwt = TestniKeycloak.token("ana", TestniKeycloak.ISSUER,
+                "drugi-api", Instant.now().plusSeconds(300));
+        assertThat(get("/api/ja", jwt).status()).isEqualTo(401);
+    }
 
-        String prviHash = jdbc.queryForObject("SELECT password_hash FROM korisnici WHERE username = ?",
-                String.class, prvi);
-        String drugiHash = jdbc.queryForObject("SELECT password_hash FROM korisnici WHERE username = ?",
-                String.class, drugi);
+    @Test
+    @DisplayName("Istekli JWT nije prihvaćen")
+    void istekliToken() {
+        String jwt = TestniKeycloak.token("ana", TestniKeycloak.ISSUER,
+                TestniKeycloak.AUDIENCE, Instant.now().minusSeconds(120));
+        assertThat(get("/api/ja", jwt).status()).isEqualTo(401);
+    }
 
-        assertThat(prviHash).isNotBlank().isNotEqualTo(drugiHash);
-        assertThat(prijava(prvi, "IstaLozinka123!")).isNotBlank();
-        assertThat(prijava(drugi, "IstaLozinka123!")).isNotBlank();
+    @Test
+    @DisplayName("Promjena JWT payloada bez novog potpisa nije prihvaćena")
+    void krivotvoreniPotpis() {
+        String jwt = token("ana");
+        String[] dijelovi = jwt.split("\\.");
+        char zamjena = dijelovi[1].charAt(0) == 'A' ? 'B' : 'A';
+        dijelovi[1] = zamjena + dijelovi[1].substring(1);
+        assertThat(get("/api/ja", String.join(".", dijelovi)).status()).isEqualTo(401);
     }
 }
