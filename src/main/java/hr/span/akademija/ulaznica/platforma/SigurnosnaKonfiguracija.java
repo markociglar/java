@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @Configuration
 public class SigurnosnaKonfiguracija {
@@ -16,7 +17,9 @@ public class SigurnosnaKonfiguracija {
     @Bean
     SecurityFilterChain keycloak(HttpSecurity http) throws Exception {
         return http
-                .csrf(csrf -> csrf.disable())
+                // API prihvaća isključivo Bearer token u zaglavlju, ne vjerodajnice iz kolačića.
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**")
+                        .csrfTokenRepository(new CookieCsrfTokenRepository()))
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(a -> a
                         .requestMatchers(HttpMethod.GET, "/", "/api/health").permitAll()

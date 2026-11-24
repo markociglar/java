@@ -19,11 +19,11 @@ class PrijavaObrascemFunkcionalniTest extends ApiTestBaza {
     }
 
     @Test
-    @DisplayName("Stari obrazac ne prihvaća lozinku i ne izdaje SESSION kolačić")
+    @DisplayName("Stari obrazac ne prihvaća lozinku i ne izdaje prijavnu sesiju")
     void lokalniObrazacJeUklonjen() {
         Odgovor odgovor = postForma("/prijava", Map.of("username", "ana", "password", "Ana12345!"));
-        assertThat(odgovor.status()).isEqualTo(401);
-        assertThat(odgovor.zaglavlje("Set-Cookie")).isNull();
+        assertThat(odgovor.status()).isEqualTo(403);
+        assertThat(odgovor.zaglavlje("Set-Cookie")).doesNotContain("JSESSIONID");
     }
 
     @Test
